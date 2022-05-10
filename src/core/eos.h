@@ -79,7 +79,7 @@ extern void eos_trigger_counter(eos_counter_t* counter);
 
 /* The TCB (task control block) structure */
 typedef struct tcb {
-	int32u_t state; // running, waiting, ready
+	int32u_t state;
 	addr_t stack_ptr;
 	addr_t stack_base;
 	size_t stack_size;
