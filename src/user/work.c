@@ -9,8 +9,6 @@ static int8u_t stack2[8096];
 static void print_number(void *arg) {
 	int i = 0; 
 	while(++i) {
-		// PRINT("num! \n");
-		// PRINT("%d \n", i);
 		printf("%d", i); 
 		eos_schedule();
 		if (i == 20) { i = 0; }
@@ -21,8 +19,6 @@ static void print_number(void *arg) {
 static void print_alphabet(void *arg) {
 	int i = 96; 
 	while(++i) {
-		// PRINT("alpha! \n");
-		// PRINT("%c \n", i)
 		printf("%c", i); 
 		eos_schedule();
 		if (i == 122) { i = 96; }
