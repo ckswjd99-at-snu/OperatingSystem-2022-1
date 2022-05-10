@@ -22,13 +22,46 @@ static _os_node_t *_os_ready_queue[LOWEST_PRIORITY + 1];
 static eos_tcb_t *_os_current_task;
 
 int32u_t eos_create_task(eos_tcb_t *task, addr_t sblock_start, size_t sblock_size, void (*entry)(void *arg), void *arg, int32u_t priority) {
-	PRINT("task: 0x%x, priority: %d\n", (int32u_t)task, priority);
+	addr_t stack_ptr = _os_create_context(sblock_start, sblock_size, entry, arg);
+	(*task).state = READY;
+	(*task).stack_ptr = stack_ptr;
+	(*task).stack_base = sblock_start;
+	(*task).stack_size = sblock_size;
+	(*task).entry = entry;
+	(*task).arg = arg;
+	_os_node_t * node_in_ready_queue = &(*task).node_in_ready_queue;
+    (*node_in_ready_queue).ptr_data = task;
+	(*node_in_ready_queue).priority = priority;
+
+	_os_add_node_tail(&(_os_ready_queue[priority]), &(*task).node_in_ready_queue);
+
+	return 0;
 }
 
 int32u_t eos_destroy_task(eos_tcb_t *task) {
 }
 
 void eos_schedule() {
+	if (eos_get_current_task()){ // if current task is specified
+		addr_t saved_stack_ptr = _os_save_context();
+		if (saved_stack_ptr != NULL){
+			(*_os_current_task).state = READY;
+			(*_os_current_task).stack_ptr = saved_stack_ptr;
+			_os_add_node_tail(&_os_ready_queue[(*_os_current_task).node_in_ready_queue.priority], &((*_os_current_task).node_in_ready_queue));
+		} else { // if it's right after the context is restored
+			return;
+		}
+	}
+	int32u_t priority = _os_get_highest_priority();
+	_os_node_t * first_node_in_queue = _os_ready_queue[priority];
+	if (first_node_in_queue){
+		_os_current_task = (*first_node_in_queue).ptr_data;
+		(*_os_current_task).state = RUNNING;
+		_os_remove_node(&_os_ready_queue[priority], first_node_in_queue);
+		_os_restore_context((*_os_current_task).stack_ptr);
+	} else { // this case, there is no ready task in ready queue
+		return;
+	}
 }
 
 eos_tcb_t *eos_get_current_task() {

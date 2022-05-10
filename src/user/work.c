@@ -5,13 +5,27 @@ static eos_tcb_t tcb2;
 static int8u_t stack1[8096];
 static int8u_t stack2[8096];
 
+/* task1 function - print number 1 to 20 repeatedly */
 static void print_number(void *arg) {
-	while (1) {
+	int i = 0; 
+	while(++i) {
+		// PRINT("num! \n");
+		// PRINT("%d \n", i);
+		printf("%d", i); 
+		eos_schedule();
+		if (i == 20) { i = 0; }
 	}
 }
 
+/* task2 function - print alphabet a to z repeatedly */
 static void print_alphabet(void *arg) {
-	while (1) {
+	int i = 96; 
+	while(++i) {
+		// PRINT("alpha! \n");
+		// PRINT("%c \n", i)
+		printf("%c", i); 
+		eos_schedule();
+		if (i == 122) { i = 96; }
 	}
 }
 
