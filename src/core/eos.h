@@ -85,7 +85,7 @@ typedef struct tcb {
 	size_t stack_size;
 	void (*entry)(void *);
 	void *arg;
-	_os_node_t queueing_node;
+	_os_node_t* queueing_node;
 } eos_tcb_t;
 
 /*

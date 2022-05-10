@@ -29,12 +29,16 @@ int32u_t eos_create_task(eos_tcb_t *task, addr_t sblock_start, size_t sblock_siz
 	task->stack_size = sblock_size;
 	task->entry = entry;
 	task->arg = arg;
-	
-	_os_node_t* queueing_node = &(*task).queueing_node;
-  (*queueing_node).ptr_data = task;
-	(*queueing_node).priority = priority;
 
-	_os_add_node_tail(&(_os_ready_queue[priority]), &(*task).queueing_node);
+	_os_node_t* queueing_node = (_os_node_t*)malloc(sizeof(_os_node_t));
+  queueing_node->ptr_data = task;
+	queueing_node->priority = priority;
+	queueing_node->next = NULL;
+	queueing_node->previous = NULL;
+
+	task->queueing_node = queueing_node;
+
+	_os_add_node_tail(&(_os_ready_queue[priority]), (*task).queueing_node);
 
 	return 0;
 }
@@ -48,7 +52,7 @@ void eos_schedule() {
 		if (saved_stack_ptr != NULL){
 			(*_os_current_task).state = READY;
 			(*_os_current_task).stack_pointer = saved_stack_ptr;
-			_os_add_node_tail(&_os_ready_queue[(*_os_current_task).queueing_node.priority], &((*_os_current_task).queueing_node));
+			_os_add_node_tail(&_os_ready_queue[(*_os_current_task).queueing_node->priority], ((*_os_current_task).queueing_node));
 		} else { // if it's right after the context is restored
 			return;
 		}
