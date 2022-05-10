@@ -52,19 +52,19 @@ int32u_t eos_destroy_task(eos_tcb_t *task) {
 
 void eos_schedule() {
 	if (eos_get_current_task()) {
-		addr_t saved_stack_ptr = _os_save_context();
+		addr_t stopped_esp = _os_save_context();
 
-		if (saved_stack_ptr == NULL) return;
+		if (stopped_esp == NULL) return;
 
-		_os_current_task->stack_pointer = saved_stack_ptr;
-		_os_add_node_tail(&_os_ready_queue[_os_current_task->queueing_node->priority], _os_current_task->queueing_node);
+		_os_current_task->stack_pointer = stopped_esp;
+		_os_add_node_tail(&(_os_ready_queue[_os_current_task->queueing_node->priority]), _os_current_task->queueing_node);
 	}
 
 	int32u_t priority = _os_get_highest_priority();
 	_os_node_t* new_current_node = _os_ready_queue[priority];
 	if (new_current_node) {
 		_os_current_task = new_current_node->ptr_data;
-		_os_remove_node(&_os_ready_queue[priority], new_current_node);
+		_os_remove_node(&(_os_ready_queue[priority]), new_current_node);
 		_os_restore_context(_os_current_task->stack_pointer);
 	}
 }
