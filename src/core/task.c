@@ -29,8 +29,9 @@ int32u_t eos_create_task(eos_tcb_t *task, addr_t sblock_start, size_t sblock_siz
 	task->stack_size = sblock_size;
 	task->entry = entry;
 	task->arg = arg;
-	_os_node_t * queueing_node = &(*task).queueing_node;
-    (*queueing_node).ptr_data = task;
+	
+	_os_node_t* queueing_node = &(*task).queueing_node;
+  (*queueing_node).ptr_data = task;
 	(*queueing_node).priority = priority;
 
 	_os_add_node_tail(&(_os_ready_queue[priority]), &(*task).queueing_node);
