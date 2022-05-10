@@ -54,13 +54,9 @@ int32u_t eos_destroy_task(eos_tcb_t *task) {
 void eos_schedule() {
 	if (eos_get_current_task()){ // if current task is specified
 		addr_t saved_stack_ptr = _os_save_context();
-		if (saved_stack_ptr != NULL){
-			(*_os_current_task).state = READY;
-			(*_os_current_task).stack_pointer = saved_stack_ptr;
-			_os_add_node_tail(&_os_ready_queue[_os_current_task->queueing_node->priority], _os_current_task->queueing_node);
-		} else { // if it's right after the context is restored
-			return;
-		}
+		if (saved_stack_ptr == NULL) return;
+		(*_os_current_task).stack_pointer = saved_stack_ptr;
+		_os_add_node_tail(&_os_ready_queue[_os_current_task->queueing_node->priority], _os_current_task->queueing_node);
 	}
 	int32u_t priority = _os_get_highest_priority();
 	_os_node_t * first_node_in_queue = _os_ready_queue[priority];
