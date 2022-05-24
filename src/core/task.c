@@ -100,14 +100,13 @@ int32u_t eos_resume_task(eos_tcb_t *task) {
 void eos_sleep(int32u_t tick) {
 	eos_alarm_t* alarm = malloc(sizeof(eos_alarm_t));
 	eos_tcb_t * current_task = eos_get_current_task();
-	int32u_t timeout = current_task->period + current_task->started_at;
-	int32u_t priority = current_task->queueing_node->priority;
 	current_task->state = WAITING;
 	
 	if (current_task->queueing_node->next == current_task->queueing_node-> previous){
-		// Thus, if this node is head
-		_os_unset_ready(priority);
+		_os_unset_ready(current_task->queueing_node->priority);
 	}
+
+	int32u_t timeout = current_task->period + current_task->started_at;
 	eos_set_alarm(eos_get_system_timer(), alarm, timeout, _os_wakeup_sleeping_task, current_task);
 	eos_schedule();
 }
@@ -135,8 +134,9 @@ void _os_wakeup_all(_os_node_t **wait_queue, int32u_t queue_type) {
 }
 
 void _os_wakeup_sleeping_task(void *arg) {
-	eos_tcb_t* task = (eos_tcb_t*) arg;
-	_os_set_ready(task->queueing_node->priority);
+	eos_tcb_t* task = (eos_tcb_t*)arg;
 	task->started_at = eos_get_system_timer()->tick;
 	task->state = READY;
+	
+	_os_set_ready(task->queueing_node->priority);
 }

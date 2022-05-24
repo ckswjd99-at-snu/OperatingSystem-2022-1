@@ -37,13 +37,10 @@ void eos_trigger_counter(eos_counter_t* counter) {
 	counter->tick += 1;
 	while (counter->alarm_queue != NULL) {
 		eos_alarm_t* alarm_head = counter->alarm_queue->ptr_data;
-		if (counter->tick == alarm_head->timeout) {
-			eos_set_alarm(counter, alarm_head, 0, NULL, NULL);
-			(alarm_head->handler)(alarm_head->arg);
-		}
-		else {
-			break;
-		}
+		if (counter->tick != alarm_head->timeout) break;
+		
+		eos_set_alarm(counter, alarm_head, 0, NULL, NULL);
+		(alarm_head->handler)(alarm_head->arg);
 	}
 	eos_schedule();
 }
