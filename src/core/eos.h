@@ -86,6 +86,8 @@ typedef struct tcb {
 	void (*entry)(void *);
 	void *arg;
 	_os_node_t* queueing_node;
+	int32u_t period;
+	int32u_t started_at;
 } eos_tcb_t;
 
 /*
