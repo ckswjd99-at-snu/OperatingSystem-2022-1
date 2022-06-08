@@ -80,8 +80,7 @@ void eos_schedule() {
 		_os_unset_ready(priority);
 	}
 
-	PRINT("now: %p\n", _os_current_task);
-	PRINT("new: %p\n", new_current_node->ptr_data);
+	PRINT("schedule now: %p, new: %p\n", _os_current_task, new_current_node->ptr_data);
 	_os_current_task = new_current_node->ptr_data;
 	_os_current_task->state = RUNNING;
 	_os_restore_context(_os_current_task->stack_pointer);

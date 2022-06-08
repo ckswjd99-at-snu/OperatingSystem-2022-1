@@ -38,8 +38,7 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 		eos_tcb_t* current_task = eos_get_current_task();
 		current_task->state = WAITING;
 
-		while(1) {
-			// push current task to the wait queue of the semaphore
+		// push current task to the wait queue of the semaphore
 			if (sem->queue_type == 0) {
 				_os_add_node_tail(&(sem->wait_queue), current_task->queueing_node);
 			}
@@ -47,9 +46,7 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 				_os_add_node_priority(&(sem->wait_queue), current_task->queueing_node);
 			}
 
-			eos_counter_t* sys_timer = eos_get_system_timer();
-			eos_alarm_t* alarm = (eos_alarm_t*)malloc(sizeof(eos_alarm_t));
-			eos_set_alarm(sys_timer, alarm, sys_timer->tick+1, _os_wakeup_sleeping_task, current_task);
+		while(1) {
 			PRINT("now set alarm and wait\n");
 
 			eos_schedule();
@@ -58,18 +55,15 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 
 			// when some task returned semaphore and called me
 			// check semaphore and return
-			_os_remove_node(&(sem->wait_queue), current_task->queueing_node);
 
 			eos_disable_interrupt();
 			if(sem->count > 0) {
 				sem->count--;
+				_os_remove_node(&(sem->wait_queue), current_task->queueing_node);
 				eos_enable_interrupt();
 				return 1;
 			}
-			if (--sys_timer == 0) {
-				eos_enable_interrupt();
-				return 0;
-			}
+			eos_enable_interrupt();
 		}
 	}
 	else if (timeout > 0) {
