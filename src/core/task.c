@@ -60,8 +60,10 @@ void eos_schedule() {
 		if (stopped_esp == NULL) return;
 
 		_os_current_task->stack_pointer = stopped_esp;
-		_os_current_task->state = READY;
-		_os_add_node_tail(&(_os_ready_queue[_os_current_task->queueing_node->priority]), _os_current_task->queueing_node);
+		if (_os_current_task->state != WAITING) {
+			_os_current_task->state = READY;
+			_os_add_node_tail(&(_os_ready_queue[_os_current_task->queueing_node->priority]), _os_current_task->queueing_node);
+		}
 	}
 
 	int32u_t priority = _os_get_highest_priority();
@@ -139,4 +141,5 @@ void _os_wakeup_sleeping_task(void *arg) {
 	task->state = READY;
 	
 	_os_set_ready(task->queueing_node->priority);
+	_os_add_node_tail(&(_os_ready_queue[task->queueing_node->priority]), task->queueing_node);
 }
