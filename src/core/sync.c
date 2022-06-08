@@ -119,6 +119,7 @@ void eos_release_semaphore(eos_semaphore_t *sem) {
 	eos_enable_interrupt();
 
 	eos_tcb_t* wake_up_task = (eos_tcb_t*)(sem->wait_queue->ptr_data);
+	PRINT("sem %p release, wake up %p\n", sem, wake_up_task);
 	_os_remove_node(&sem->wait_queue, wake_up_task->queueing_node);
 	_os_wakeup_sleeping_task(wake_up_task);
 }
