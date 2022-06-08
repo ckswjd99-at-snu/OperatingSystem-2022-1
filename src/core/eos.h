@@ -251,8 +251,8 @@ typedef struct eos_mqueue {
 	void * front;
 	void * rear;
 	int8u_t queue_type;
-	eos_semaphore_t putsem;
-	eos_semaphore_t getsem;
+	eos_semaphore_t* putsem;
+	eos_semaphore_t* getsem;
 } eos_mqueue_t;
 
 /*
