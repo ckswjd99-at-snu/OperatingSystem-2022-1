@@ -71,6 +71,7 @@ void eos_schedule() {
 
 	int32u_t priority = _os_get_highest_priority();
 	_os_node_t* new_current_node = _os_ready_queue[priority];
+	PRINT("now: %p, new: %p\n", _os_current_task, new_current_node->ptr_data);
 	if (new_current_node) {
 		_os_current_task = new_current_node->ptr_data;
 		_os_current_task->state = RUNNING;
