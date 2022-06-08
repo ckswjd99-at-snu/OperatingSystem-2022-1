@@ -15,6 +15,7 @@ void eos_init_mqueue(eos_mqueue_t *mq, void *queue_start, int16u_t queue_size, i
 
   mq->queue_start = queue_start;
   mq->queue_size = queue_size;
+  mq->queue_end = (int8u_t *)(mq->queue_start) + mq->queue_size;
   mq->msg_size = msg_size;
   mq->queue_type = queue_type;
   mq->putsem = putsem;
@@ -28,8 +29,7 @@ int8u_t eos_send_message(eos_mqueue_t *mq, void *message, int32s_t timeout) {
   if (putsem_aquired) { 
     for (int32u_t i=0; i < (mq->msg_size); i++) {
       *(int8u_t*)(++mq->rear) = ((int8u_t*)message)[i];
-      int8u_t* queue_end = (int8u_t *)(mq->queue_start) + mq->queue_size;
-      if ((int8u_t*)mq->rear >= queue_end) {
+      if (mq->rear >= mq->queue_end) {
         mq->rear = (int8u_t *)(mq->queue_start) - 1;
       }
     }
@@ -43,7 +43,7 @@ int8u_t eos_receive_message(eos_mqueue_t *mq, void *message, int32s_t timeout) {
   if (getsem_aquired) {
     for (int32u_t i=0; i < (mq->msg_size); i++) {
       ((int8u_t *)message)[i] = *((int8u_t *)(mq->front)++);
-      if (mq->front > (int8u_t *)(mq->queue_start) + mq->queue_size) {
+      if (mq->front > mq->queue_end) {
         mq->front = mq->queue_start;
       }
     }
