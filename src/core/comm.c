@@ -30,7 +30,7 @@ int8u_t eos_send_message(eos_mqueue_t *mq, void *message, int32s_t timeout) {
       *(int8u_t*)(++mq->rear) = ((int8u_t*)message)[i];
       int8u_t* queue_end = (int8u_t *)(mq->queue_start) + mq->queue_size;
       if ((int8u_t*)mq->rear >= queue_end) {
-        (int8u_t*)(mq->rear) = (int8u_t *)(mq->queue_start) - 1;
+        mq->rear = (int8u_t *)(mq->queue_start) - 1;
       }
     }
     eos_release_semaphore(mq->getsem);
