@@ -7,9 +7,12 @@
  ********************************************************/
 #include <core/eos.h>
 
+#ifndef TCB_STATE
+#define TCB_STATE
 #define READY		1
 #define RUNNING		2
 #define WAITING		3
+#endif
 
 /*
  * Queue (list) of tasks that are ready to run.
