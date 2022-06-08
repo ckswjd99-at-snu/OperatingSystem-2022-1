@@ -28,7 +28,7 @@ int8u_t eos_send_message(eos_mqueue_t *mq, void *message, int32s_t timeout) {
   if (putsem_aquired) { 
     for (int32u_t i=0; i < (mq->msg_size); i++) {
       *(int8u_t*)(++mq->rear) = ((int8u_t*)message)[i];
-      int8u_t* queue_end = (int8u_t *)(mq->queue_start) + mq->queue_size
+      int8u_t* queue_end = (int8u_t *)(mq->queue_start) + mq->queue_size;
       if ((int8u_t*)mq->rear >= queue_end) {
         (int8u_t*)(mq->rear) = (int8u_t *)(mq->queue_start) - 1;
       }
