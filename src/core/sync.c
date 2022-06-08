@@ -50,8 +50,11 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 			eos_counter_t* sys_timer = eos_get_system_timer();
 			eos_alarm_t* alarm = (eos_alarm_t*)malloc(sizeof(eos_alarm_t));
 			eos_set_alarm(sys_timer, alarm, sys_timer->tick+1, _os_wakeup_sleeping_task, current_task);
+			PRINT("now set alarm and wait\n");
 
 			eos_schedule();
+
+			PRINT("return from schedule\n");
 
 			// when some task returned semaphore and called me
 			// check semaphore and return
