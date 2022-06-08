@@ -65,20 +65,25 @@ void eos_schedule() {
 		_os_current_task->stack_pointer = stopped_esp;
 		if (_os_current_task->state != WAITING) {
 			_os_current_task->state = READY;
+			_os_current_task->started_at = eos_get_system_timer()->tick;
+			_os_set_ready(_os_current_task->queueing_node->priority);
 			_os_add_node_tail(&(_os_ready_queue[_os_current_task->queueing_node->priority]), _os_current_task->queueing_node);
 		}
 	}
 
 	int32u_t priority = _os_get_highest_priority();
 	_os_node_t* new_current_node = _os_ready_queue[priority];
+	_os_remove_node(&(_os_ready_queue[priority]), new_current_node);
+
+	if(_os_ready_queue[priority] == NULL) {
+		_os_unset_ready(priority);
+	}
+
 	PRINT("now: %p\n", _os_current_task);
 	PRINT("new: %p\n", new_current_node->ptr_data);
-	if (new_current_node) {
-		_os_current_task = new_current_node->ptr_data;
-		_os_current_task->state = RUNNING;
-		_os_remove_node(&(_os_ready_queue[priority]), new_current_node);
-		_os_restore_context(_os_current_task->stack_pointer);
-	}
+	_os_current_task = new_current_node->ptr_data;
+	_os_current_task->state = RUNNING;
+	_os_restore_context(_os_current_task->stack_pointer);
 }
 
 eos_tcb_t *eos_get_current_task() {
@@ -108,10 +113,6 @@ void eos_sleep(int32u_t tick) {
 	eos_alarm_t* alarm = malloc(sizeof(eos_alarm_t));
 	eos_tcb_t * current_task = eos_get_current_task();
 	current_task->state = WAITING;
-	
-	if (current_task->queueing_node->next == current_task->queueing_node-> previous){
-		_os_unset_ready(current_task->queueing_node->priority);
-	}
 
 	int32u_t timeout = current_task->period + current_task->started_at;
 	eos_set_alarm(eos_get_system_timer(), alarm, timeout, _os_wakeup_sleeping_task, current_task);
