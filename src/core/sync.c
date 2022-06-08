@@ -46,7 +46,8 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 			}
 
 			eos_counter_t* sys_timer = eos_get_system_timer();
-			eos_set_alarm(sys_timer, &(current_task->alarm), sys_timer->tick+1, _os_wakeup_sleeping_task, current_task);
+			eos_alarm_t* alarm = (eos_alarm_t*)malloc(sizeof(eos_alarm_t));
+			eos_set_alarm(sys_timer, alarm, sys_timer->tick+1, _os_wakeup_sleeping_task, current_task);
 
 			eos_schedule();
 
@@ -80,24 +81,33 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 			}
 
 			int32u_t timeout_count = timeout;
-
+			eos_counter_t* sys_timer = eos_get_system_timer();
+			eos_alarm_t* alarm = (eos_alarm_t*)malloc(sizeof(eos_alarm_t));
+			eos_set_alarm(sys_timer, alarm, sys_timer->tick+1, _os_wakeup_sleeping_task, current_task);
 
 			eos_schedule();
 
 			// when some task returned semaphore and called me
 			// check semaphore and return
+			_os_remove_node(&(sem->wait_queue), current_task->queueing_node);
+
 			eos_disable_interrupt();
 			if(sem->count > 0) {
 				sem->count--;
 				eos_enable_interrupt();
 				return 1;
 			}
+			
+			if (--timeout == 0) {
+				eos_enable_interrupt();
+				return 0;
+			}
 			eos_enable_interrupt();
 		}
 	}
 
 
-	return 0
+	return 0;
 }
 
 void eos_release_semaphore(eos_semaphore_t *sem) {
