@@ -22,6 +22,7 @@ void eos_init_semaphore(eos_semaphore_t *sem, int32u_t initial_count, int8u_t qu
 }
 
 int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
+	PRINT("requested semaphore: %p, timeout: %d\n", sem, timeout);
 	eos_disable_interrupt();
 	
 	if (sem->count > 0) {	// acquire success case
