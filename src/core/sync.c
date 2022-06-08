@@ -15,7 +15,6 @@
 #endif
 
 void eos_init_semaphore(eos_semaphore_t *sem, int32u_t initial_count, int8u_t queue_type) {
-	PRINT("sem: %p\n", sem);
 	/* initialization */
 	sem->count = initial_count;
 	sem->wait_queue = NULL;
@@ -23,7 +22,6 @@ void eos_init_semaphore(eos_semaphore_t *sem, int32u_t initial_count, int8u_t qu
 }
 
 int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
-	PRINT("requested semaphore: %p, timeout: %d\n", sem, timeout);
 	eos_disable_interrupt();
 	
 	if (sem->count > 0) {	// acquire success case
@@ -47,11 +45,9 @@ int32u_t eos_acquire_semaphore(eos_semaphore_t *sem, int32s_t timeout) {
 			}
 
 		while(1) {
-			PRINT("now set alarm and wait\n");
 
 			eos_schedule();
 
-			PRINT("return from schedule\n");
 
 			// when some task returned semaphore and called me
 			// check semaphore and return
@@ -119,7 +115,6 @@ void eos_release_semaphore(eos_semaphore_t *sem) {
 	eos_enable_interrupt();
 
 	eos_tcb_t* wake_up_task = (eos_tcb_t*)(sem->wait_queue->ptr_data);
-	PRINT("sem %p release, wake up %p\n", sem, wake_up_task);
 	_os_remove_node(&sem->wait_queue, wake_up_task->queueing_node);
 	_os_wakeup_sleeping_task(wake_up_task);
 }
