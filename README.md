@@ -1,4 +1,4 @@
-# SNUOS 2022-1
+# Operating System 2022-1
 
 Project in **SNU ECE Introduction to OS (430.318)** lecture, at 2022 spring.
 
